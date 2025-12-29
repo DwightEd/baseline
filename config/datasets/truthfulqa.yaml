@@ -1,0 +1,84 @@
+# ============================================================================
+# TruthfulQA Dataset Configuration
+# ============================================================================
+# Paper: "TruthfulQA: Measuring How Models Mimic Human Falsehoods"
+# Link: https://arxiv.org/abs/2109.07958
+# ============================================================================
+
+_inherits: "_base"
+
+meta:
+  name: "truthfulqa"
+  full_name: "TruthfulQA"
+  version: "1.0"
+  description: "Benchmark for measuring truthfulness in language model generations"
+  paper: "TruthfulQA: Measuring How Models Mimic Human Falsehoods"
+  url: "https://github.com/sylinrl/TruthfulQA"
+  license: "Apache-2.0"
+  task_type: "qa"
+  
+paths:
+  # HuggingFace dataset
+  huggingface_path: "truthful_qa"
+  subset: "generation"
+  
+  # Local paths
+  local_path: "${DATA_DIR:./data}/truthfulqa"
+  cache_dir: "${CACHE_DIR:./cache}/datasets/truthfulqa"
+
+format: "huggingface"
+
+field_mapping:
+  id: null  # Auto-generated
+  question: "question"
+  answer: null  # Will be generated
+  gold_answer: "best_answer"
+  context: null
+  
+  # Additional fields
+  category: "category"
+  correct_answers: "correct_answers"
+  incorrect_answers: "incorrect_answers"
+  source: "source"
+
+# Multiple reference answers
+multi_reference:
+  enabled: true
+  correct_field: "correct_answers"
+  incorrect_field: "incorrect_answers"
+  best_answer_field: "best_answer"
+
+# Categories in TruthfulQA
+categories:
+  - "Health"
+  - "Law"
+  - "Conspiracies"
+  - "Misconceptions"
+  - "Finance"
+  - "Nutrition"
+  - "Psychology"
+  - "Politics"
+  - "Science"
+  - "Sociology"
+  - "History"
+  - "Economics"
+  - "Stereotypes"
+
+# Evaluation settings
+evaluation:
+  # Judge models for truthfulness
+  judge_models:
+    - "gpt-3.5-turbo"
+    - "gpt-4"
+  
+  # Metrics
+  metrics:
+    - "truthful_rate"
+    - "informative_rate"
+    - "truthful_informative_rate"
+
+statistics:
+  total_questions: 817
+  categories: 38
+  avg_correct_answers: 4.1
+  avg_incorrect_answers: 5.2

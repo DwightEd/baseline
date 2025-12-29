@@ -1,0 +1,94 @@
+# ============================================================================
+# Base Dataset Configuration Template
+# ============================================================================
+# All dataset configs inherit from this base.
+# Override specific fields in individual dataset configs.
+# ============================================================================
+
+# Dataset metadata
+_meta:
+  type: "base"
+  version: "1.0"
+  
+# Common dataset settings
+common:
+  # Data format
+  format: "jsonl"  # json | jsonl | csv | parquet | huggingface
+  encoding: "utf-8"
+  
+  # Field mappings (source field -> standard field)
+  # Standard fields: id, question, answer, gold_answer, context, label
+  field_mapping:
+    id: "id"
+    question: "question"
+    answer: "answer"
+    gold_answer: "gold_answer"
+    context: "context"
+    label: "label"
+  
+  # Data loading
+  max_samples: null  # null = load all
+  shuffle: false
+  random_seed: 42
+  
+  # Split handling
+  split_field: null  # Field containing train/test split info
+  default_split: "test"
+  
+  # Filtering
+  filters: []  # List of filter conditions
+  
+  # Quality control
+  quality:
+    min_question_length: 1
+    min_answer_length: 0
+    max_question_length: null
+    max_answer_length: null
+    remove_duplicates: true
+    
+  # Preprocessing
+  preprocessing:
+    strip_whitespace: true
+    normalize_unicode: true
+    lowercase: false
+    remove_html: false
+
+# Task type definitions
+task_types:
+  qa:
+    description: "Question Answering"
+    requires_context: false
+    requires_gold_answer: true
+    
+  summary:
+    description: "Summarization"
+    requires_context: true
+    requires_gold_answer: false
+    
+  data2txt:
+    description: "Data to Text Generation"
+    requires_context: true
+    requires_gold_answer: false
+    
+  dialogue:
+    description: "Dialogue/Conversation"
+    requires_context: true
+    requires_gold_answer: false
+    
+  math:
+    description: "Mathematical Reasoning"
+    requires_context: false
+    requires_gold_answer: true
+    answer_extraction_pattern: "####\\s*(.+)$"
+
+# Label definitions
+labels:
+  binary:
+    0: "no_hallucination"
+    1: "hallucination"
+  
+  hallucination_types:
+    evident_conflict: "Evident Conflict"
+    evident_baseless: "Evident Baseless Info"
+    subtle_conflict: "Subtle Conflict"
+    subtle_baseless: "Subtle Baseless Info"

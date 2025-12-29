@@ -1,0 +1,123 @@
+# ============================================================================
+# Ensemble Detection Method Configuration
+# ============================================================================
+
+_inherits: "_base"
+
+meta:
+  name: "ensemble"
+  full_name: "Ensemble Hallucination Detection"
+  description: "Combines multiple detection methods for improved performance"
+  version: "1.0"
+
+# Component methods
+components:
+  # Methods to include
+  methods:
+    - name: "lapeigvals"
+      weight: 1.0
+      enabled: true
+      config_override: {}
+      
+    - name: "entropy"
+      weight: 1.0
+      enabled: true
+      config_override: {}
+      
+    - name: "perplexity"
+      weight: 0.8
+      enabled: true
+      config_override: {}
+    
+    - name: "attention_score"
+      weight: 0.5
+      enabled: false
+      config_override: {}
+
+# Ensemble strategy
+strategy:
+  # Combination method
+  method: "weighted_average"  # voting | weighted_average | stacking | meta_learner
+  
+  # For voting
+  voting:
+    type: "soft"  # hard | soft
+    threshold: 0.5
+  
+  # For weighted average
+  weighted_average:
+    normalize_weights: true
+    
+  # For stacking
+  stacking:
+    meta_learner: "logistic_regression"
+    use_probabilities: true
+    cv: 5
+  
+  # For meta learner
+  meta_learner:
+    type: "random_forest"
+    hyperparameters:
+      n_estimators: 100
+      max_depth: 5
+
+# Weight learning
+weight_learning:
+  enabled: false
+  method: "grid_search"  # grid_search | learned | correlation
+  
+  # Grid search
+  grid_search:
+    weight_range: [0.0, 0.5, 1.0, 1.5, 2.0]
+    metric: "auroc"
+    cv: 5
+  
+  # Learned weights
+  learned:
+    optimizer: "adam"
+    epochs: 100
+    learning_rate: 0.01
+
+# Diversity measures
+diversity:
+  compute: true
+  metrics:
+    - "disagreement"
+    - "correlation"
+    - "q_statistic"
+
+# Confidence estimation
+confidence:
+  method: "agreement"  # agreement | entropy | calibrated
+  
+  # Agreement-based
+  agreement:
+    threshold: 0.8  # Proportion agreeing
+    
+  # Calibration
+  calibration:
+    method: "isotonic"
+    cv: 5
+
+# Fallback behavior
+fallback:
+  # When some methods fail
+  on_partial_failure: "use_available"  # use_available | fail | skip
+  
+  # Minimum methods required
+  min_methods: 2
+
+# Training
+training:
+  # Train all components together or separately
+  joint_training: false
+  
+  # Use same train/val split for all
+  shared_split: true
+
+evaluation:
+  # Evaluate ensemble and components
+  evaluate_components: true
+  
+  # Compare with best component
+  compare_best: true

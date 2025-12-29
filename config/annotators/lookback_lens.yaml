@@ -1,0 +1,88 @@
+# ============================================================================
+# Lookback Lens Hallucination Detection Configuration
+# ============================================================================
+# Reference: "Lookback Lens: Detecting and Mitigating Contextual Hallucinations
+#            in Large Language Models Using Only Attention Maps"
+# Paper: https://arxiv.org/abs/2407.07071
+# GitHub: https://github.com/voidism/Lookback-Lens
+# ============================================================================
+
+# Enable/disable Lookback Lens annotation
+enabled: true
+
+# Context window size for "recent" tokens
+# Larger window = more tokens considered as "recent context"
+context_window: 10
+
+# Hallucination detection threshold (0-1)
+# Higher threshold = fewer false positives, may miss some hallucinations
+# Lower threshold = more sensitive, may have more false positives
+# Paper suggests 0.5 as default
+threshold: 0.5
+
+# Which attention layer to use for analysis
+# Options: "first", "last", "mean", "all", or integer layer index (0, 1, 2, ...)
+# "first" (layer 0) is recommended in the original paper
+layer_to_use: "first"
+
+# How to aggregate attention across heads
+# Options: "mean", "max", "median", "min"
+aggregate_heads: "mean"
+
+# Normalize attention weights before computing ratio
+normalize_attention: true
+
+# Minimum confidence to include in annotations
+# Set higher to filter out uncertain predictions
+min_confidence: 0.0
+
+# Use gold labels for training data instead of prediction
+# Recommended for teacher forcing mode
+use_gold_for_train: true
+
+# ============================================================================
+# Advanced Options
+# ============================================================================
+
+# Attention ratio interpretation:
+# - High ratio to recent tokens = potential hallucination
+# - High ratio to context tokens = likely factual
+#
+# The lookback ratio is computed as:
+#   attention_to_recent / (attention_to_recent + attention_to_context)
+#
+# If lookback_ratio > threshold, the token is marked as potential hallucination
+
+# Special token handling
+exclude_special_tokens: true
+special_tokens:
+  - "<s>"
+  - "</s>"
+  - "<pad>"
+  - "[CLS]"
+  - "[SEP]"
+  - "[PAD]"
+
+# Batch processing settings
+batch_size: 32
+show_progress: true
+
+# ============================================================================
+# Presets
+# ============================================================================
+
+presets:
+  # Conservative: Fewer false positives
+  conservative:
+    threshold: 0.7
+    min_confidence: 0.3
+    
+  # Sensitive: Catch more potential hallucinations
+  sensitive:
+    threshold: 0.3
+    min_confidence: 0.0
+    
+  # Balanced: Default settings
+  balanced:
+    threshold: 0.5
+    min_confidence: 0.1

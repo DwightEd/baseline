@@ -1,0 +1,121 @@
+# DVC Pipeline Parameters
+# =======================
+# Single source of truth for all pipeline parameters
+# Referenced by dvc.yaml using ${param} syntax
+
+# Dataset parameters
+dataset: "ragtruth"
+data_path: "${RAGTRUTH_DATA_DIR:./data/ragtruth}"
+split: "test"
+max_samples: null
+task_types:
+  - QA
+  - Summary
+  - Data2txt
+
+# Model parameters
+model:
+  name: "meta-llama/Llama-3.1-8B-Instruct"
+  dtype: "float16"
+  max_length: 4096
+  device_map: "auto"
+  load_in_4bit: false
+
+# Feature extraction parameters
+feature_extraction:
+  mode: "teacher_forcing"
+  batch_size: 1
+  # Attention layer selection - ENHANCED
+  # Options: "all", "first", "last", "first_n", "last_n", or list [0,1,2]
+  attention:
+    enabled: true
+    layers: "first"  # Use first layer for efficiency
+    first_n: 1       # Number of layers for first_n mode
+    last_n: 4        # Number of layers for last_n mode
+    n_eigenvalues: 10
+    compute_laplacian: true
+    save_raw_weights: false  # Set to true to save full attention matrices
+  hidden_states:
+    enabled: true
+    last_n: 4
+  token_probs:
+    enabled: true
+
+# Batch processing parameters (NEW)
+batch_processing:
+  # Process all task types and splits in one command
+  task_types: "all"  # "all" or list ["QA", "Summary"]
+  splits: "all"      # "all" or list ["train", "test"]
+  max_samples_per_task: null  # null for all samples
+  # Lookback Lens annotation
+  enable_annotation: true
+  annotation_threshold: 0.5
+  # Progress display
+  show_progress: true
+
+# Hallucination annotation parameters (NEW)
+annotation:
+  # Method: lookback_lens, api_based, gold_labels
+  method: "lookback_lens"
+  # Use gold labels from dataset when available
+  use_gold_labels: true
+  
+  # Lookback Lens settings (reference: https://github.com/voidism/Lookback-Lens)
+  lookback_lens:
+    enabled: true
+    # Hallucination threshold (0-1)
+    # Higher = fewer false positives, may miss some hallucinations
+    threshold: 0.5
+    # Which layer to use: "first", "last", "mean", or layer index
+    layer_to_use: "first"
+    # Context window for recent tokens
+    context_window: 10
+    # Head aggregation: mean, max, median, min
+    aggregate_heads: "mean"
+  
+  # API-based annotation (optional fallback)
+  api:
+    enabled: false
+    provider: "openai"  # openai, anthropic
+    model: "gpt-4"
+    max_retries: 3
+
+# Output configuration (NEW)
+output:
+  # Path template: {dataset}_{model}_{mode}_{split}
+  path_template: "{dataset}_{model}_{mode}_{split}"
+  # What to save
+  save_features: true
+  save_metadata: true  # metadata.jsonl (lapeigvals format)
+  save_attention_maps: false  # Raw attention matrices (large!)
+  compress: false
+
+# Detection methods to train
+methods:
+  - lapeigvals
+  - entropy
+  - perplexity
+  - random_forest
+  - ensemble
+
+# Training parameters
+training:
+  epochs: 100
+  batch_size: 32
+  learning_rate: 0.001
+  weight_decay: 0.01
+  early_stopping_patience: 10
+
+# Evaluation parameters
+evaluation:
+  threshold: 0.5
+  bootstrap_samples: 1000
+  metrics:
+    - auroc
+    - auprc
+    - f1
+    - accuracy
+
+# Output directories
+output_dir: "./outputs"
+cache_dir: "./cache"

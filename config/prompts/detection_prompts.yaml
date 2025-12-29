@@ -1,0 +1,191 @@
+# ============================================================================
+# Hallucination Detection Prompts Configuration
+# ============================================================================
+# Prompts for LLM-based hallucination detection
+# ============================================================================
+
+_inherits: "_base"
+
+# Binary detection prompts (yes/no)
+binary:
+  # Simple binary detection
+  simple: |
+    Given the following question and answer, determine if the answer contains 
+    any hallucinated or false information.
+    
+    Question: {question}
+    Answer: {answer}
+    
+    Does this answer contain hallucinations? (Yes/No):
+  
+  # With context
+  with_context: |
+    Given the context, question, and answer below, determine if the answer 
+    contains information that is not supported by or contradicts the context.
+    
+    Context: {context}
+    Question: {question}
+    Answer: {answer}
+    
+    Does this answer contain hallucinations? (Yes/No):
+  
+  # With reference answer
+  with_reference: |
+    Compare the generated answer with the reference answer. Determine if the 
+    generated answer contains any false or unsupported information.
+    
+    Question: {question}
+    Reference Answer: {gold_answer}
+    Generated Answer: {answer}
+    
+    Does the generated answer contain hallucinations? (Yes/No):
+
+# Detailed detection prompts (with explanation)
+detailed:
+  # Comprehensive analysis
+  analysis: |
+    Analyze the following answer for potential hallucinations or factual errors.
+    
+    Context: {context}
+    Question: {question}
+    Answer: {answer}
+    
+    Provide your analysis in the following format:
+    1. Contains Hallucination: [Yes/No]
+    2. Type of Hallucination: [Factual Error/Unsupported Claim/Contradiction/None]
+    3. Problematic Spans: [List specific text spans with issues]
+    4. Explanation: [Detailed explanation]
+  
+  # JSON output format
+  json_output: |
+    Analyze the answer for hallucinations and return a JSON response.
+    
+    Context: {context}
+    Question: {question}  
+    Answer: {answer}
+    
+    Return a JSON object with the following structure:
+    {{
+      "has_hallucination": true/false,
+      "confidence": 0.0-1.0,
+      "hallucination_type": "factual_error|unsupported|contradiction|none",
+      "problematic_spans": [
+        {{"text": "...", "start": 0, "end": 10, "reason": "..."}}
+      ],
+      "explanation": "..."
+    }}
+  
+  # Span-level detection
+  span_level: |
+    Identify all hallucinated spans in the following answer. A span is 
+    hallucinated if it contains information that is factually incorrect 
+    or not supported by the provided context.
+    
+    Context: {context}
+    Question: {question}
+    Answer: {answer}
+    
+    For each hallucinated span, provide:
+    - The exact text span
+    - The start and end character positions
+    - The type of hallucination (conflict, baseless, etc.)
+    - Why it is considered a hallucination
+
+# Comparative detection prompts
+comparative:
+  # Compare with gold answer
+  vs_gold: |
+    Compare the following two answers and identify any differences that 
+    constitute hallucinations in the generated answer.
+    
+    Question: {question}
+    Correct Answer: {gold_answer}
+    Generated Answer: {answer}
+    
+    Analysis:
+  
+  # Fact verification
+  fact_check: |
+    Verify each factual claim in the following answer against the provided 
+    context. Identify any claims that are unsupported or contradicted.
+    
+    Context: {context}
+    Answer: {answer}
+    
+    For each claim:
+    1. The claim
+    2. Supported/Unsupported/Contradicted
+    3. Evidence from context (if any)
+
+# Scoring prompts
+scoring:
+  # Faithfulness score
+  faithfulness: |
+    Rate the faithfulness of the following answer to the provided context 
+    on a scale of 1-5.
+    
+    1 = Completely unfaithful (major hallucinations)
+    2 = Mostly unfaithful
+    3 = Partially faithful
+    4 = Mostly faithful
+    5 = Completely faithful (no hallucinations)
+    
+    Context: {context}
+    Answer: {answer}
+    
+    Faithfulness Score (1-5):
+    Explanation:
+  
+  # Accuracy score
+  accuracy: |
+    Rate the factual accuracy of the following answer on a scale of 1-5.
+    
+    1 = Completely inaccurate
+    2 = Mostly inaccurate
+    3 = Partially accurate
+    4 = Mostly accurate
+    5 = Completely accurate
+    
+    Question: {question}
+    Answer: {answer}
+    Reference: {gold_answer}
+    
+    Accuracy Score (1-5):
+    Explanation:
+
+# Hallucination type classification
+classification:
+  # Type classification
+  type: |
+    Classify the type of hallucination in the following answer:
+    
+    Types:
+    - Evident Conflict: Clearly contradicts the provided information
+    - Evident Baseless: States facts not present in any source
+    - Subtle Conflict: Minor contradictions or misrepresentations
+    - Subtle Baseless: Slight unsupported inferences or additions
+    - None: No hallucination detected
+    
+    Context: {context}
+    Answer: {answer}
+    
+    Hallucination Type:
+    Explanation:
+
+# Output parsing
+output_parsing:
+  binary:
+    positive_patterns:
+      - "yes"
+      - "contains hallucination"
+      - "hallucinated"
+    negative_patterns:
+      - "no"
+      - "no hallucination"
+      - "accurate"
+    
+  score:
+    pattern: "(?:Score|Rating)[:\\s]*([1-5])"
+    
+  json:
+    extract_pattern: "\\{[^{}]*\\}"

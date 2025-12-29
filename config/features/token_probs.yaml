@@ -1,0 +1,153 @@
+# ============================================================================
+# Token Probability Feature Extraction Configuration
+# ============================================================================
+
+enabled: true
+
+# Basic probability extraction
+probabilities:
+  # Compute softmax probabilities
+  compute: true
+  
+  # Temperature for softmax (1.0 = standard)
+  temperature: 1.0
+  
+  # Top-k probabilities
+  top_k:
+    enabled: true
+    k: 10
+    include_indices: true
+  
+  # Actual token probability
+  actual_token:
+    enabled: true
+    log_prob: true  # Also compute log probability
+
+# Entropy features
+entropy:
+  enabled: true
+  
+  # Token-level entropy
+  token_level:
+    enabled: true
+    base: "e"  # e | 2 | 10
+    
+  # Sequence-level entropy
+  sequence_level:
+    mean: true
+    max: true
+    min: true
+    std: true
+    total: true
+  
+  # Normalized entropy
+  normalized:
+    enabled: true
+    by: "vocab_size"
+
+# Perplexity
+perplexity:
+  enabled: true
+  
+  # Token-level perplexity
+  token_level: true
+  
+  # Sequence-level perplexity
+  sequence_level: true
+  
+  # Windowed perplexity
+  windowed:
+    enabled: false
+    window_size: 10
+    stride: 5
+
+# Uncertainty quantification
+uncertainty:
+  # Predictive entropy
+  predictive_entropy: true
+  
+  # Mutual information (requires multiple samples)
+  mutual_information:
+    enabled: false
+    n_samples: 5
+  
+  # Variance of predictions
+  variance:
+    enabled: false
+    n_samples: 5
+
+# Probability distribution analysis
+distribution:
+  # Distribution shape
+  shape:
+    skewness: true
+    kurtosis: true
+    
+  # Top probability analysis
+  top_probs:
+    ratio_1_2: true  # Ratio of top-1 to top-2
+    concentration: true  # Sum of top-k
+    
+  # Confidence measures
+  confidence:
+    max_prob: true
+    margin: true  # Difference between top-1 and top-2
+    
+  # Calibration (if labels available)
+  calibration:
+    enabled: false
+    n_bins: 10
+
+# Cross-token analysis
+cross_token:
+  # Token probability trajectory
+  trajectory:
+    enabled: true
+    metrics:
+      - "mean"
+      - "trend"
+      - "variance"
+  
+  # Probability drops/spikes
+  anomalies:
+    enabled: true
+    threshold: 2.0  # Standard deviations
+    
+  # N-gram probabilities
+  ngram:
+    enabled: false
+    n: [2, 3, 4]
+
+# Comparison with reference
+reference_comparison:
+  enabled: false
+  
+  # Compare with gold answer tokens
+  vs_gold:
+    enabled: false
+    alignment: "exact"  # exact | fuzzy
+    
+  # KL divergence
+  kl_divergence:
+    enabled: false
+
+# Memory optimization
+memory:
+  # Save precision
+  precision: "float32"  # float16 may lose precision for small probs
+  
+  # Only save statistics (not per-token probs)
+  statistics_only: false
+  
+  # Compress small probabilities
+  compress:
+    enabled: true
+    threshold: 1e-6
+
+# Output
+output:
+  save_token_probs: false  # Per-token probabilities
+  save_top_k: true
+  save_entropy: true
+  save_perplexity: true
+  save_statistics: true

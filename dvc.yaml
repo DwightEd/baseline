@@ -1,0 +1,89 @@
+# DVC Pipeline Configuration
+# ==========================
+# Reproducible ML pipeline for hallucination detection
+
+stages:
+  # Stage 1: Extract features from model
+  extract_features:
+    cmd: >
+      python scripts/extract_features.py
+      --config config/config.yaml
+      --dataset ${dataset}
+      --data_path "${data_path}"
+      --split ${split}
+      --output_dir ${output_dir}/features
+      --cache_dir ${cache_dir}
+    deps:
+      - scripts/extract_features.py
+      - src/features/extractor.py
+      - src/datasets/ragtruth.py
+      - src/models/loader.py
+    params:
+      - dataset
+      - data_path
+      - split
+      - max_samples
+      - model
+      - feature_extraction
+    outs:
+      - ${output_dir}/features:
+          cache: true
+          persist: true
+
+  # Stage 2: Train detection methods
+  train:
+    cmd: >
+      python scripts/train.py
+      --config config/config.yaml
+      --features_dir ${output_dir}/features
+      --methods ${methods}
+      --output_dir ${output_dir}/models
+    deps:
+      - scripts/train.py
+      - src/methods/detectors.py
+      - ${output_dir}/features
+    params:
+      - methods
+      - training
+    outs:
+      - ${output_dir}/models:
+          cache: true
+          persist: true
+
+  # Stage 3: Evaluate trained models
+  evaluate:
+    cmd: >
+      python scripts/evaluate.py
+      --config config/config.yaml
+      --features_dir ${output_dir}/features
+      --models_dir ${output_dir}/models
+      --output_dir ${output_dir}/results
+    deps:
+      - scripts/evaluate.py
+      - src/evaluation/metrics.py
+      - ${output_dir}/features
+      - ${output_dir}/models
+    params:
+      - evaluation
+    metrics:
+      - ${output_dir}/results/metrics.json:
+          cache: false
+    plots:
+      - ${output_dir}/results/roc_curves.json:
+          cache: false
+          x: fpr
+          y: tpr
+      - ${output_dir}/results/pr_curves.json:
+          cache: false
+          x: recall
+          y: precision
+
+# Plots configuration
+plots:
+  - ${output_dir}/results/comparison.csv:
+      x: method
+      y: auroc
+
+# Parameter groups for experiments
+vars:
+  - params.yaml

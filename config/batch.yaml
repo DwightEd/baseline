@@ -1,0 +1,137 @@
+# ============================================================================
+# Batch Processing Configuration
+# ============================================================================
+# One-click batch processing of all RAGTruth task_types with teacher forcing
+# ============================================================================
+
+# Dataset settings
+dataset: "ragtruth"
+data_path: "${RAGTRUTH_DATA_DIR:./data/ragtruth}"
+
+# Model settings
+model: "meta-llama/Llama-3.1-8B-Instruct"
+
+# Extraction mode
+# Options: "teacher_forcing", "generation"
+# teacher_forcing: Use gold answers for feature extraction (recommended)
+# generation: Let model generate responses
+mode: "teacher_forcing"
+
+# ============================================================================
+# Task Types & Splits
+# ============================================================================
+# Process all task types and splits in one command
+# Set to "all" to process everything, or provide specific list
+
+# Task types to process
+# Options: "all" or list like ["QA", "Summary", "Data2txt"]
+task_types: "all"
+
+# Splits to process
+# Options: "all" or list like ["train", "test"]
+splits: "all"
+
+# Maximum samples per task type (null = all samples)
+# Useful for testing with smaller subset
+max_samples_per_task: null
+
+# ============================================================================
+# Attention Layer Selection
+# ============================================================================
+# Which attention layers to extract
+# Options:
+#   - "first": Only first layer (layer 0) - fastest, recommended for Lookback Lens
+#   - "last": Only last layer
+#   - "all": All layers (large output, slower)
+#   - "first_n": First N layers (use with first_n parameter)
+#   - "last_n": Last N layers (use with last_n parameter)
+#   - [0, 4, 8]: Specific layer indices
+
+attention_layers: "first"
+
+# For "first_n" or "last_n" modes
+attention_first_n: 1
+attention_last_n: 4
+
+# ============================================================================
+# Hallucination Annotation
+# ============================================================================
+# Enable automatic hallucination annotation using Lookback Lens
+
+enable_annotation: true
+
+# Annotation settings
+annotation:
+  method: "lookback_lens"  # Options: lookback_lens, api_based, gold_labels
+  threshold: 0.5
+  use_gold_labels: true    # Also use dataset's gold labels
+  
+  # Lookback Lens specific settings
+  lookback_lens:
+    layer_to_use: "first"
+    context_window: 10
+    aggregate_heads: "mean"
+
+# ============================================================================
+# Output Settings
+# ============================================================================
+
+output_dir: "./outputs"
+
+# Output path template
+# Available variables: {dataset}, {model}, {mode}, {split}, {task_type}
+output_path_template: "{dataset}_{model}_{mode}_{split}_{task_type}"
+
+# What to save
+save_features: true
+save_metadata: true        # metadata.jsonl (lapeigvals format)
+save_attention_maps: false # Raw attention matrices (large!)
+compress_features: false   # Gzip compression
+
+# ============================================================================
+# Processing Settings
+# ============================================================================
+
+# Show progress bars (tqdm)
+show_progress: true
+
+# Batch size for processing (samples per batch)
+batch_size: 1
+
+# Cache settings
+use_cache: true
+cache_dir: "./cache"
+
+# ============================================================================
+# Model Loading Settings
+# ============================================================================
+
+model_config:
+  dtype: "float16"
+  device_map: "auto"
+  trust_remote_code: true
+  attn_implementation: "eager"  # Required for attention output
+  load_in_4bit: false
+  load_in_8bit: false
+
+# ============================================================================
+# Example Usage
+# ============================================================================
+#
+# Command line:
+#   python scripts/run_batch.py --config config/batch.yaml
+#
+# With overrides:
+#   python scripts/run_batch.py \
+#     --config config/batch.yaml \
+#     --task_types QA Summary \
+#     --splits test \
+#     --attention_layers first \
+#     --max_samples 100
+#
+# Quick test:
+#   python scripts/run_batch.py \
+#     --config config/batch.yaml \
+#     --task_types QA \
+#     --splits test \
+#     --max_samples 10

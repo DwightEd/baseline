@@ -1,0 +1,137 @@
+# ============================================================================
+# Laplacian Eigenvalue Method Configuration
+# ============================================================================
+# Based on: "Detecting Hallucinations in Large Language Models Using 
+#           Semantic Entropy" and spectral graph theory
+# ============================================================================
+
+_inherits: "_base"
+
+meta:
+  name: "lapeigvals"
+  full_name: "Laplacian Eigenvalue Method"
+  description: "Detects hallucinations using spectral properties of attention graphs"
+  paper: null
+  version: "1.0"
+
+# Feature requirements
+features:
+  required:
+    attention: true
+    hidden_states: false
+    token_probs: false
+  
+  # Specific attention features needed
+  attention_features:
+    - "laplacian_eigenvalues"
+    - "eigenvalues"
+
+# Laplacian computation
+laplacian:
+  # Normalization type
+  normalization: "symmetric"  # symmetric | random_walk | unnormalized
+  
+  # Number of eigenvalues to use
+  n_eigenvalues: 10
+  
+  # Eigenvalue selection
+  eigenvalue_selection: "smallest"  # smallest | largest | both
+  
+  # Include zero eigenvalue
+  include_zero: false
+  
+  # Regularization
+  regularization:
+    enabled: true
+    epsilon: 1e-10
+
+# Feature aggregation
+aggregation:
+  # Across layers
+  layer_aggregation: "mean"  # mean | concat | weighted
+  layer_weights: null
+  
+  # Across heads
+  head_aggregation: "mean"  # mean | concat | max
+  
+  # Final feature vector
+  feature_vector:
+    include_eigenvalues: true
+    include_statistics: true
+    statistics:
+      - "mean"
+      - "std"
+      - "max"
+      - "min"
+      - "spectral_gap"
+
+# Classifier
+classifier:
+  type: "logistic_regression"  # logistic_regression | svm | random_forest | mlp
+  
+  # Logistic regression params
+  logistic_regression:
+    penalty: "l2"
+    C: 1.0
+    max_iter: 1000
+    solver: "lbfgs"
+    class_weight: "balanced"
+  
+  # SVM params
+  svm:
+    kernel: "rbf"
+    C: 1.0
+    gamma: "scale"
+    class_weight: "balanced"
+  
+  # Random Forest params
+  random_forest:
+    n_estimators: 100
+    max_depth: 10
+    min_samples_split: 5
+    class_weight: "balanced"
+  
+  # MLP params
+  mlp:
+    hidden_layers: [64, 32]
+    activation: "relu"
+    dropout: 0.2
+
+# Preprocessing
+preprocessing:
+  # Standardization
+  scaler: "standard"  # standard | minmax | robust | null
+  
+  # Feature selection
+  feature_selection:
+    enabled: false
+    method: "mutual_info"
+    n_features: 50
+  
+  # Outlier handling
+  outlier_handling:
+    enabled: true
+    method: "clip"
+    n_std: 3
+
+# Hyperparameter search space
+hyperparameters:
+  n_eigenvalues:
+    type: "int"
+    low: 5
+    high: 20
+  
+  classifier_C:
+    type: "float"
+    low: 0.01
+    high: 100
+    log: true
+
+# Evaluation
+evaluation:
+  primary_metric: "auroc"
+  metrics:
+    - "auroc"
+    - "auprc"
+    - "f1"
+    - "accuracy"

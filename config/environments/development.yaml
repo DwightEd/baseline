@@ -1,0 +1,69 @@
+# ============================================================================
+# Development Environment Configuration
+# ============================================================================
+
+_meta:
+  environment: "development"
+  description: "Fast iteration with reduced resources"
+
+# Override global settings
+global:
+  log_level: "DEBUG"
+  device: "auto"
+
+# Dataset limits for fast testing
+dataset:
+  max_samples: 100
+  
+# Model settings
+model:
+  loading:
+    device_map: "auto"
+  
+  # Use smaller model variant if available
+  prefer_small: true
+
+# Feature extraction
+feature_extraction:
+  batch_size: 1
+  
+  # Reduce feature computation
+  attention:
+    layers:
+      mode: "last_n"
+      last_n: 4
+    spectral:
+      n_eigenvalues: 5
+      
+  hidden_states:
+    layers:
+      mode: "last_n"
+      last_n: 2
+
+# Training
+training:
+  epochs: 10
+  batch_size: 8
+  
+  # Quick early stopping
+  early_stopping:
+    patience: 3
+
+# Evaluation
+evaluation:
+  bootstrap_samples: 100
+  generate_plots: true
+
+# Caching
+cache:
+  enabled: true
+  clear_on_start: false
+
+# Logging
+logging:
+  console:
+    level: "DEBUG"
+    colored: true
+  file:
+    enabled: true
+    level: "DEBUG"

@@ -1,0 +1,73 @@
+# ============================================================================
+# GSM8K Dataset Configuration
+# ============================================================================
+# Paper: "Training Verifiers to Solve Math Word Problems"
+# Link: https://arxiv.org/abs/2110.14168
+# ============================================================================
+
+_inherits: "_base"
+
+meta:
+  name: "gsm8k"
+  full_name: "GSM8K"
+  version: "1.0"
+  description: "Grade school math word problems with step-by-step solutions"
+  paper: "Training Verifiers to Solve Math Word Problems"
+  url: "https://github.com/openai/grade-school-math"
+  license: "MIT"
+  task_type: "math"
+
+paths:
+  huggingface_path: "gsm8k"
+  subset: "main"
+  local_path: "${DATA_DIR:./data}/gsm8k"
+
+format: "huggingface"
+
+field_mapping:
+  id: null
+  question: "question"
+  answer: null  # Generated
+  gold_answer: "answer"
+  context: null
+
+# Answer extraction
+answer_extraction:
+  # GSM8K answers end with "#### <final_answer>"
+  pattern: "####\\s*(.+)$"
+  
+  # Numeric answer extraction
+  extract_numeric: true
+  numeric_pattern: "(-?[\\d,]+\\.?\\d*)"
+  
+  # Clean answer
+  remove_commas: true
+  strip_whitespace: true
+
+# Chain of thought
+chain_of_thought:
+  enabled: true
+  delimiter: "####"
+  extract_steps: true
+  step_pattern: "(?:Step \\d+:|\\d+\\.)"
+
+# Evaluation
+evaluation:
+  # Exact match on final answer
+  exact_match: true
+  
+  # Numeric tolerance
+  numeric_tolerance: 0.001
+  
+  # Consider equivalent forms
+  equivalent_forms: true
+
+splits:
+  train: "train"
+  test: "test"
+
+statistics:
+  train_samples: 7473
+  test_samples: 1319
+  avg_steps: 4.2
+  max_steps: 14

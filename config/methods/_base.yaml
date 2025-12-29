@@ -1,0 +1,76 @@
+# ============================================================================
+# Base Detection Method Configuration
+# ============================================================================
+
+_meta:
+  type: "base"
+  version: "1.0"
+
+# Common method settings
+common:
+  # Random seed
+  random_seed: 42
+  
+  # Device
+  device: "auto"
+  
+  # Verbose output
+  verbose: true
+
+# Feature requirements
+features:
+  # Which features this method requires
+  required:
+    attention: false
+    hidden_states: false
+    token_probs: false
+    
+  # Optional features that improve performance
+  optional:
+    attention: true
+    hidden_states: true
+    token_probs: true
+
+# Classification settings
+classification:
+  # Task type
+  task: "binary"  # binary | multiclass | regression
+  
+  # Threshold for binary classification
+  threshold: 0.5
+  threshold_selection: "fixed"  # fixed | optimal_f1 | youden_j
+  
+  # Class weights
+  class_weights: "balanced"  # balanced | null | custom
+  custom_weights: null
+
+# Model persistence
+persistence:
+  # Save format
+  format: "pickle"  # pickle | joblib | torch
+  
+  # Compression
+  compress: true
+  
+  # Include preprocessing
+  save_preprocessor: true
+
+# Cross-validation
+cross_validation:
+  enabled: false
+  n_folds: 5
+  stratified: true
+  shuffle: true
+
+# Hyperparameter tuning
+hyperparameter_tuning:
+  enabled: false
+  method: "grid"  # grid | random | bayesian
+  n_trials: 50
+  metric: "auroc"
+  
+# Calibration
+calibration:
+  enabled: false
+  method: "isotonic"  # isotonic | platt
+  cv: 5

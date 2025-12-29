@@ -1,0 +1,107 @@
+# ============================================================================
+# Entropy-Based Detection Method Configuration
+# ============================================================================
+
+_inherits: "_base"
+
+meta:
+  name: "entropy"
+  full_name: "Entropy-Based Hallucination Detection"
+  description: "Detects hallucinations using token probability entropy"
+  version: "1.0"
+
+features:
+  required:
+    attention: false
+    hidden_states: false
+    token_probs: true
+  
+  token_prob_features:
+    - "entropy"
+    - "perplexity"
+
+# Entropy computation
+entropy:
+  # Type of entropy
+  type: "shannon"  # shannon | renyi
+  
+  # Renyi entropy parameter (if type=renyi)
+  alpha: 2.0
+  
+  # Base for logarithm
+  base: "e"  # e | 2 | 10
+  
+  # Normalization
+  normalize: true
+  normalize_by: "vocab_size"
+
+# Feature construction
+feature_construction:
+  # Token-level features
+  token_level:
+    mean: true
+    std: true
+    max: true
+    min: true
+    median: true
+    
+  # Sequence-level features
+  sequence_level:
+    total_entropy: true
+    entropy_rate: true
+    
+  # Position-based features
+  position_based:
+    enabled: true
+    positions:
+      - "first_quarter"
+      - "second_quarter"
+      - "third_quarter"
+      - "fourth_quarter"
+    
+  # Windowed features
+  windowed:
+    enabled: true
+    window_size: 10
+    stride: 5
+    aggregations:
+      - "mean"
+      - "max"
+
+# Thresholding method (for unsupervised)
+thresholding:
+  enabled: false
+  method: "percentile"  # fixed | percentile | adaptive
+  percentile: 90
+  fixed_value: 3.0
+
+# Classifier
+classifier:
+  type: "logistic_regression"
+  
+  logistic_regression:
+    penalty: "l2"
+    C: 1.0
+    max_iter: 1000
+    class_weight: "balanced"
+
+preprocessing:
+  scaler: "standard"
+  
+  # Handle extreme values
+  clip:
+    enabled: true
+    min_percentile: 1
+    max_percentile: 99
+
+hyperparameters:
+  window_size:
+    type: "int"
+    low: 5
+    high: 20
+  
+  classifier_C:
+    type: "float"
+    low: 0.01
+    high: 100
+    log: true

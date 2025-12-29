@@ -1,0 +1,166 @@
+# ============================================================================
+# RAGTruth Dataset Configuration
+# ============================================================================
+# Paper: "RAGTruth: A Hallucination Corpus for Developing Trustworthy RAG"
+# Link: https://arxiv.org/abs/2401.00396
+# License: MIT
+# ============================================================================
+
+_inherits: "_base"
+
+# Dataset metadata
+meta:
+  name: "ragtruth"
+  full_name: "RAGTruth"
+  version: "1.0"
+  description: "Hallucination corpus for RAG systems with word-level annotations"
+  paper: "RAGTruth: A Hallucination Corpus for Developing Trustworthy RAG"
+  url: "https://github.com/ParticleMedia/RAGTruth"
+  license: "MIT"
+  citation: |
+    @article{wu2023ragtruth,
+      title={RAGTruth: A Hallucination Corpus for Developing Trustworthy Retrieval-Augmented Language Models},
+      author={Wu, Cheng-Han and others},
+      journal={arXiv preprint arXiv:2401.00396},
+      year={2023}
+    }
+
+# Data paths
+paths:
+  # Base directory - override with environment variable
+  base_dir: "${RAGTRUTH_DATA_DIR:/data/RAGTruth/dataset}"
+  
+  # Data files
+  response_file: "response.jsonl"
+  source_info_file: "source_info.jsonl"
+  
+  # Fallback paths (tried in order if base_dir not found)
+  fallback_dirs:
+    - "./data/ragtruth"
+    - "../data/RAGTruth/dataset"
+    - "${HOME}/data/RAGTruth/dataset"
+
+# Data format
+format: "jsonl"
+
+# Field mappings specific to RAGTruth
+field_mapping:
+  # Response file fields
+  response:
+    id: "id"
+    source_id: "source_id"
+    model: "model"
+    temperature: "temperature"
+    response: "response"
+    labels: "labels"
+    split: "split"
+    quality: "quality"
+  
+  # Source info file fields
+  source:
+    source_id: "source_id"
+    task_type: "task_type"
+    prompt: "prompt"
+    source_info: "source_info"
+  
+  # Label fields within labels array
+  label:
+    text: "text"
+    start: "start"
+    end: "end"
+    label_type: "label_type"
+    implicit_true: "implicit_true"
+    due_to_null: "due_to_null"
+
+# Task types in RAGTruth
+task_types:
+  QA:
+    name: "Question Answering"
+    context_field: "passages"
+    context_type: "list"  # List of passage strings
+    
+  Summary:
+    name: "Summarization"
+    context_field: "source_info"
+    context_type: "string"  # Direct text
+    
+  Data2txt:
+    name: "Data to Text"
+    context_field: "source_info"
+    context_type: "json"  # JSON object
+
+# Label generation
+label_generation:
+  # Binary label: 0 if labels array is empty, 1 otherwise
+  method: "binary_from_labels"
+  positive_condition: "len(labels) > 0"
+  
+  # Hallucination type mapping
+  type_mapping:
+    "Evident Conflict": "evident_conflict"
+    "Evident Baseless Info": "evident_baseless"
+    "Subtle Conflict": "subtle_conflict"
+    "Subtle Baseless Info": "subtle_baseless"
+
+# Data splitting
+splitting:
+  # Use original train/test split from dataset
+  use_original: true
+  split_field: "split"
+  
+  # Value mapping
+  split_values:
+    train: "train"
+    test: "test"
+  
+  # For creating validation set from train
+  create_validation: true
+  validation_ratio: 0.15  # Take 15% of train for validation
+
+# Quality filtering
+quality_filter:
+  # Exclude specific quality labels
+  exclude_quality:
+    - "incorrect_refusal"
+    - "truncated"
+  
+  # Only include good quality responses
+  only_good_quality: true
+  good_quality_value: "good"
+
+# Model filtering (which source models to include)
+model_filter:
+  enabled: false
+  include_models:
+    - "gpt-3.5-turbo-0613"
+    - "gpt-4-0613"
+    - "llama-2-7b-chat"
+    - "llama-2-13b-chat"
+    - "llama-2-70b-chat"
+    - "mistral-7B-instruct"
+
+# Task type filtering
+task_filter:
+  enabled: false
+  include_tasks:
+    - "QA"
+    - "Summary"
+    - "Data2txt"
+
+# Statistics (for reference)
+statistics:
+  total_responses: 18029
+  total_sources: 3831
+  models: 6
+  task_types: 3
+  hallucination_rate: 0.456  # Approximate
+
+# Preprocessing
+preprocessing:
+  # Context extraction
+  extract_context: true
+  max_context_length: 8192
+  
+  # Response cleaning
+  clean_response: true
+  remove_special_tokens: true

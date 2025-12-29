@@ -1,0 +1,60 @@
+# ============================================================================
+# Production Environment Configuration
+# ============================================================================
+
+_meta:
+  environment: "production"
+  description: "Full-scale production settings"
+
+global:
+  log_level: "INFO"
+  device: "auto"
+  num_workers: 8
+
+dataset:
+  max_samples: null  # Use all data
+
+model:
+  loading:
+    device_map: "auto"
+    low_cpu_mem_usage: true
+
+feature_extraction:
+  batch_size: 4
+  
+  attention:
+    layers:
+      mode: "all"
+    spectral:
+      n_eigenvalues: 10
+      
+  hidden_states:
+    layers:
+      mode: "last_n"
+      last_n: 4
+
+training:
+  epochs: 200
+  batch_size: 64
+  
+  early_stopping:
+    patience: 20
+
+evaluation:
+  bootstrap_samples: 5000
+  generate_plots: true
+  save_predictions: true
+
+cache:
+  enabled: true
+  compression: true
+
+logging:
+  console:
+    level: "INFO"
+  file:
+    enabled: true
+    level: "DEBUG"
+    json_format: true
+  wandb:
+    enabled: true

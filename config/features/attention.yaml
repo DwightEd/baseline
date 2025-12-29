@@ -1,0 +1,126 @@
+# ============================================================================
+# Attention Feature Extraction Configuration
+# ============================================================================
+
+# Basic settings
+enabled: true
+
+# Layer selection - ENHANCED
+# Supported modes:
+#   - "all": All layers
+#   - "first": First layer only (layer 0)
+#   - "last": Last layer only
+#   - "first_n": First N layers (use first_n parameter)
+#   - "last_n": Last N layers (use last_n parameter)
+#   - specific: List of specific layer indices
+layers:
+  mode: "first"  # all | first | last | first_n | last_n | specific
+  first_n: 1     # Number of layers for first_n mode
+  last_n: 4      # Number of layers for last_n mode
+  specific: []   # e.g., [0, 4, 8, 12, 16, 20, 24, 28, 31]
+
+# Head selection
+heads:
+  mode: "all"  # all | specific | sample
+  specific: []
+  sample_n: 8
+
+# Attention matrix processing
+processing:
+  # Response-only extraction (exclude prompt attention)
+  response_only: true
+  
+  # Attention aggregation
+  aggregation:
+    enabled: false
+    method: "mean"  # mean | max | weighted
+    weights: null  # For weighted aggregation
+  
+  # Normalization
+  normalize: true
+  normalization_type: "row"  # row | column | symmetric
+  
+  # Thresholding
+  threshold:
+    enabled: false
+    value: 0.01
+    method: "absolute"  # absolute | percentile
+
+# Spectral features (eigenvalues)
+spectral:
+  # Eigenvalue computation
+  eigenvalues:
+    enabled: true
+    n_eigenvalues: 10
+    method: "full"  # full | truncated
+    normalize: true
+    
+  # Laplacian eigenvalues
+  laplacian:
+    enabled: true
+    n_eigenvalues: 10
+    normalization: "symmetric"  # symmetric | random_walk | unnormalized
+    
+  # Additional spectral metrics
+  metrics:
+    spectral_radius: true
+    spectral_gap: true
+    effective_rank: true
+    trace: true
+    log_determinant: true
+
+# Graph features
+graph:
+  # Build attention graph
+  build_graph: true
+  
+  # Graph construction
+  construction:
+    threshold: 0.01
+    top_k: null
+    binarize: false
+  
+  # Graph metrics
+  metrics:
+    degree_distribution: true
+    clustering_coefficient: true
+    path_lengths: false  # Expensive for large graphs
+    centrality: true
+
+# Statistical features
+statistics:
+  # Per-layer statistics
+  per_layer:
+    mean: true
+    std: true
+    max: true
+    min: true
+    entropy: true
+    sparsity: true
+  
+  # Cross-layer statistics
+  cross_layer:
+    layer_similarity: true
+    layer_variance: true
+
+# Memory optimization
+memory:
+  # Save as sparse if mostly zeros
+  sparse_threshold: 0.9
+  
+  # Precision
+  save_precision: "float16"  # float16 | float32
+  
+  # Chunking for large sequences
+  chunk_size: 1024
+  
+  # Only save summary statistics (not full matrices)
+  summary_only: false
+
+# Output format
+output:
+  save_raw_attention: false  # Full attention matrices (large!)
+  save_eigenvalues: true
+  save_laplacian_eigenvalues: true
+  save_statistics: true
+  save_graph_metrics: false

@@ -1,0 +1,135 @@
+# ============================================================================
+# Hidden State Feature Extraction Configuration
+# ============================================================================
+
+enabled: true
+
+# Layer selection
+layers:
+  mode: "last_n"  # all | last_n | specific | first_last
+  last_n: 4
+  specific: []
+  first_last: true  # Include first and last layers
+
+# Token selection
+tokens:
+  mode: "response"  # all | response | prompt | specific
+  
+  # For response mode
+  response:
+    include_prompt_last: false  # Include last prompt token
+    
+  # For specific positions
+  specific_positions: []  # e.g., [-1, -2, -3] for last 3 tokens
+
+# Pooling strategies
+pooling:
+  enabled: true
+  
+  methods:
+    mean:
+      enabled: true
+      dim: "sequence"  # sequence | layer
+    
+    max:
+      enabled: true
+      dim: "sequence"
+      
+    last_token:
+      enabled: true
+      
+    first_token:
+      enabled: false
+      
+    attention_weighted:
+      enabled: false
+      attention_source: "last_layer"
+    
+    cls_token:
+      enabled: false  # For encoder models
+
+# Dimensionality reduction
+reduction:
+  # PCA
+  pca:
+    enabled: true
+    n_components: 64
+    fit_on: "train"  # train | batch | global
+    whiten: false
+    
+  # UMAP (optional, for visualization)
+  umap:
+    enabled: false
+    n_components: 2
+    n_neighbors: 15
+    min_dist: 0.1
+
+# Layer analysis
+layer_analysis:
+  # Layer-wise statistics
+  statistics:
+    enabled: true
+    metrics:
+      - "mean"
+      - "std"
+      - "norm"
+      - "max_activation"
+  
+  # Layer similarity
+  similarity:
+    enabled: true
+    method: "cosine"  # cosine | euclidean | centered_kernel
+    
+  # Layer variance
+  variance:
+    enabled: true
+    across: "sequence"
+
+# Token analysis
+token_analysis:
+  # Token-wise norms
+  norms:
+    enabled: true
+    ord: 2  # L2 norm
+    
+  # Token trajectory
+  trajectory:
+    enabled: false  # Track token across layers
+    method: "cosine_distance"
+
+# Representation analysis
+representation:
+  # Isotropy
+  isotropy:
+    enabled: true
+    method: "avg_cosine"
+    
+  # Intrinsic dimensionality
+  intrinsic_dim:
+    enabled: false
+    method: "mle"
+    
+  # Anisotropy
+  anisotropy:
+    enabled: true
+
+# Memory optimization
+memory:
+  # Save precision
+  precision: "float16"
+  
+  # Only save pooled (not full sequences)
+  pooled_only: true
+  
+  # Compress with quantization
+  quantize:
+    enabled: false
+    bits: 8
+
+# Output
+output:
+  save_raw_states: false
+  save_pooled: true
+  save_reduced: true
+  save_statistics: true
+  save_layer_analysis: true

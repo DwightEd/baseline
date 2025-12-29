@@ -1,0 +1,193 @@
+# ============================================================================
+# Task Prompts Configuration
+# ============================================================================
+# User prompts for different tasks
+# ============================================================================
+
+_inherits: "_base"
+
+# Question Answering Prompts
+qa:
+  # Simple QA (no context)
+  simple: |
+    Question: {question}
+    
+    Answer:
+  
+  # QA with context/passages
+  with_context: |
+    Context:
+    {context}
+    
+    Question: {question}
+    
+    Answer:
+  
+  # RAGTruth QA format
+  ragtruth: |
+    Based on the following passages, answer the question.
+    
+    Passages:
+    {context}
+    
+    Question: {question}
+    
+    Answer:
+  
+  # Multiple choice QA
+  multiple_choice: |
+    Question: {question}
+    
+    Options:
+    {options}
+    
+    Answer (select one):
+  
+  # Conversational QA
+  conversational: |
+    Conversation history:
+    {history}
+    
+    Current question: {question}
+    
+    Answer:
+
+# Summarization Prompts
+summarization:
+  # Basic summarization
+  basic: |
+    Please summarize the following text:
+    
+    {context}
+    
+    Summary:
+  
+  # Length-constrained summary
+  constrained: |
+    Please summarize the following text in approximately {max_words} words:
+    
+    {context}
+    
+    Summary:
+  
+  # RAGTruth summary format
+  ragtruth: |
+    Summarize the following text concisely:
+    
+    {context}
+    
+    Summary:
+  
+  # Extractive summary
+  extractive: |
+    Extract the key sentences from the following text:
+    
+    {context}
+    
+    Key sentences:
+  
+  # Bullet point summary
+  bullet_points: |
+    Summarize the following text as bullet points:
+    
+    {context}
+    
+    Summary:
+
+# Data to Text Prompts
+data2txt:
+  # Basic data description
+  basic: |
+    Describe the following data in natural language:
+    
+    {context}
+    
+    Description:
+  
+  # RAGTruth data2txt format
+  ragtruth: |
+    Based on the following data, write a natural language description 
+    between {min_words} and {max_words} words:
+    
+    Data:
+    {context}
+    
+    Description:
+  
+  # Table description
+  table: |
+    Describe the contents of this table:
+    
+    {context}
+    
+    Description:
+  
+  # JSON description
+  json: |
+    Convert this JSON data into a natural language description:
+    
+    {context}
+    
+    Description:
+
+# Mathematical Reasoning Prompts
+math:
+  # Chain of thought
+  chain_of_thought: |
+    Solve the following problem step by step:
+    
+    {question}
+    
+    Solution:
+  
+  # GSM8K format
+  gsm8k: |
+    {question}
+    
+    Let's solve this step by step:
+  
+  # Verification
+  verification: |
+    Verify the following solution:
+    
+    Problem: {question}
+    Solution: {answer}
+    
+    Is this solution correct? Explain:
+
+# Dialogue/Conversation Prompts
+dialogue:
+  # Single turn
+  single_turn: |
+    User: {question}
+    
+    Assistant:
+  
+  # Multi-turn with context
+  multi_turn: |
+    Background: {context}
+    
+    Conversation:
+    {history}
+    
+    User: {question}
+    
+    Assistant:
+
+# General Generation Prompts
+generation:
+  # Open-ended generation
+  open_ended: |
+    {question}
+  
+  # Completion
+  completion: |
+    Complete the following:
+    
+    {context}
+  
+  # Instruction following
+  instruction: |
+    Instruction: {question}
+    
+    Response:

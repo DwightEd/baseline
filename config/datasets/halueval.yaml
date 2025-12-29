@@ -1,0 +1,83 @@
+# ============================================================================
+# HaluEval Dataset Configuration
+# ============================================================================
+# Paper: "HaluEval: A Large-Scale Hallucination Evaluation Benchmark"
+# Link: https://arxiv.org/abs/2305.11747
+# ============================================================================
+
+_inherits: "_base"
+
+meta:
+  name: "halueval"
+  full_name: "HaluEval"
+  version: "1.0"
+  description: "Large-scale hallucination evaluation benchmark with multiple tasks"
+  paper: "HaluEval: A Large-Scale Hallucination Evaluation Benchmark for LLMs"
+  url: "https://github.com/RUCAIBox/HaluEval"
+  license: "MIT"
+
+paths:
+  base_dir: "${HALUEVAL_DATA_DIR:./data/halueval}"
+  
+  # Task-specific files
+  files:
+    qa: "qa_data.jsonl"
+    dialogue: "dialogue_data.jsonl"
+    summarization: "summarization_data.jsonl"
+    general: "general_data.jsonl"
+
+format: "jsonl"
+
+# Task configurations
+tasks:
+  qa:
+    description: "Question Answering Hallucination"
+    field_mapping:
+      question: "question"
+      answer: "hallucinated_answer"
+      gold_answer: "right_answer"
+      context: "knowledge"
+      label: "hallucination"
+    label_values:
+      positive: "yes"
+      negative: "no"
+      
+  dialogue:
+    description: "Dialogue Response Hallucination"
+    field_mapping:
+      question: "dialogue_history"
+      answer: "hallucinated_response"
+      gold_answer: "right_response"
+      context: "knowledge"
+      label: "hallucination"
+      
+  summarization:
+    description: "Summarization Hallucination"
+    field_mapping:
+      question: null
+      answer: "hallucinated_summary"
+      gold_answer: "right_summary"
+      context: "document"
+      label: "hallucination"
+      
+  general:
+    description: "General Knowledge Hallucination"
+    field_mapping:
+      question: "user_query"
+      answer: "chatgpt_response"
+      gold_answer: null
+      context: null
+      label: "hallucination"
+
+# Default task
+default_task: "qa"
+
+# Combined loading
+combine_tasks: false
+
+statistics:
+  qa_samples: 10000
+  dialogue_samples: 10000
+  summarization_samples: 10000
+  general_samples: 5000
+  total_samples: 35000

@@ -1,0 +1,52 @@
+# ============================================================================
+# Base Prompt Configuration Template
+# ============================================================================
+
+_meta:
+  type: "base"
+  version: "1.0"
+
+# Prompt structure
+structure:
+  # Template variable syntax
+  variable_pattern: "{variable_name}"
+  
+  # Optional sections
+  optional_prefix: "?"
+  
+  # List formatting
+  list_separator: "\n"
+  list_item_prefix: "- "
+
+# Common variables
+variables:
+  # Input variables
+  question: "The question to answer"
+  context: "Background context or passages"
+  answer: "The answer to evaluate"
+  gold_answer: "The correct/reference answer"
+  
+  # Control variables
+  max_words: "Maximum words in response"
+  min_words: "Minimum words in response"
+  language: "Response language"
+
+# Formatting rules
+formatting:
+  # Whitespace handling
+  strip_whitespace: true
+  normalize_newlines: true
+  max_consecutive_newlines: 2
+  
+  # Length limits
+  max_prompt_length: null
+  truncation_strategy: "end"  # start | end | middle
+
+# Validation
+validation:
+  # Required variables per prompt type
+  required_variables:
+    qa: ["question"]
+    qa_with_context: ["question", "context"]
+    summarization: ["context"]
+    detection: ["question", "answer"]

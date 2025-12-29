@@ -1,0 +1,135 @@
+# Hallucination Detection Framework Configuration
+# ================================================
+# Environment-specific configs: default, development, production
+# Environment variables: ${VAR_NAME} or ${VAR_NAME:default_value}
+
+default:
+  project_name: "hallucination-detection"
+  random_seed: 42
+  device: "auto"
+  log_level: "INFO"
+  
+  # Dataset configuration
+  dataset:
+    name: "ragtruth"
+    path: "${RAGTRUTH_DATA_DIR:./data/ragtruth}"
+    format: "jsonl"
+    task_type: "qa"
+    max_samples: null
+    field_mapping: {}
+  
+  # Model configuration
+  model:
+    name: "${MODEL_NAME:meta-llama/Llama-3.1-8B-Instruct}"
+    path: "${MODEL_PATH:}"
+    dtype: "float16"
+    device_map: "auto"
+    trust_remote_code: true
+    attn_implementation: "eager"
+    max_length: 4096
+    load_in_8bit: false
+    load_in_4bit: false
+  
+  # Feature extraction configuration
+  feature_extraction:
+    mode: "teacher_forcing"
+    batch_size: 1
+    max_length: 4096
+    cache_features: true
+    cache_dir: "${CACHE_DIR:./cache}/features"
+    
+    attention:
+      enabled: true
+      layers: "all"
+      heads: "all"
+      compute_eigenvalues: true
+      n_eigenvalues: 10
+      compute_laplacian: true
+      normalization: "symmetric"
+    
+    hidden_states:
+      enabled: true
+      layers: "last_n"
+      last_n: 4
+      compute_pca: true
+      pca_components: 64
+      pooling: "mean"
+    
+    token_probs:
+      enabled: true
+      compute_entropy: true
+      compute_perplexity: true
+      top_k_probs: 10
+  
+  # Text generation configuration
+  generation:
+    max_new_tokens: 256
+    temperature: 0.7
+    top_p: 0.9
+    top_k: 50
+    do_sample: true
+    repetition_penalty: 1.0
+  
+  # Training configuration
+  training:
+    epochs: 100
+    batch_size: 32
+    learning_rate: 0.001
+    weight_decay: 0.01
+    optimizer: "adam"
+    scheduler: null
+    early_stopping_patience: 10
+    gradient_clip_norm: 1.0
+  
+  # Evaluation configuration
+  evaluation:
+    metrics:
+      - auroc
+      - auprc
+      - f1
+      - accuracy
+      - precision
+      - recall
+    threshold: 0.5
+    bootstrap_samples: 1000
+    confidence_level: 0.95
+  
+  # Output paths
+  output_dir: "${OUTPUT_DIR:./outputs}"
+  cache_dir: "${CACHE_DIR:./cache}"
+
+# Development environment overrides
+development:
+  log_level: "DEBUG"
+  dataset:
+    max_samples: 100
+  feature_extraction:
+    batch_size: 1
+  training:
+    epochs: 10
+    batch_size: 8
+  evaluation:
+    bootstrap_samples: 100
+
+# Production environment overrides
+production:
+  log_level: "INFO"
+  feature_extraction:
+    batch_size: 4
+    cache_features: true
+  training:
+    epochs: 200
+    early_stopping_patience: 20
+  evaluation:
+    bootstrap_samples: 5000
+
+# Testing environment overrides
+testing:
+  log_level: "WARNING"
+  dataset:
+    max_samples: 10
+  training:
+    epochs: 2
+    batch_size: 4
+  evaluation:
+    bootstrap_samples: 0
